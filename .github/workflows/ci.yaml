@@ -1,0 +1,44 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu:resolute
+    steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            build-essential ca-certificates cmake git libgtest-dev libxml2-dev \
+            libyaml-dev pkg-config
+      - uses: actions/checkout@v4
+        with:
+          path: src/downstream_src_a
+      - uses: actions/checkout@v4
+        with:
+          repository: rep159-testing/upstream_a
+          ref: main
+          path: src/upstream_a
+      - uses: actions/checkout@v4
+        with:
+          repository: rep159-testing/upstream_b
+          ref: main
+          path: src/upstream_b
+      - uses: actions/checkout@v4
+        with:
+          repository: rep159-testing/upstream_c
+          ref: main
+          path: src/upstream_c
+      - name: Build and test in dependency order
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="$PWD/install"
+          export LD_LIBRARY_PATH="$prefix/lib"
+          for pkg in upstream_a upstream_b upstream_c downstream_src_a; do
+            cmake -S "src/$pkg" -B "build/$pkg" -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_PREFIX_PATH="$prefix" -DBUILD_TESTING=ON
+            cmake --build "build/$pkg" --parallel
+            ctest --test-dir "build/$pkg" --output-on-failure --no-tests=error
+            cmake --install "build/$pkg"
+          done
