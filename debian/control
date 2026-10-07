@@ -1,0 +1,12 @@
+Source: ros-srcext-downstream-src-a
+Section: misc
+Priority: optional
+Maintainer: "Jose Luis Rivero" <jrivero@honurobotics.com>
+Build-Depends: debhelper (>= 9.0.0), cmake, libgtest-dev, libgtest-dev <!nocheck>, libyaml-dev, pkg-config, ros-srcext-upstream-c, ros-srcext-ros-workspace
+Homepage: https://index.ros.org/p/downstream_src_a/#srcext
+Standards-Version: 3.9.2
+
+Package: ros-srcext-downstream-src-a
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyaml-0-2, ros-srcext-upstream-c, ros-srcext-ros-workspace
+Description: Package of the srcext distribution of the REP-159 test harness: reads a YAML document with libyaml and labels its XML payload through the upstream chain, which srcext rebuilds with source_rebuild.
